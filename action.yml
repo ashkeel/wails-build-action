@@ -89,7 +89,10 @@ inputs:
     description: "Windows Signing Certificate Password"
     required: false
     default: ''
-
+  windows-nsis-installer:
+    description: "Creates NSIS Installer for Windows"
+    required: false
+    default: "true"
 runs:
   using: "composite"
   steps:
@@ -139,7 +142,12 @@ runs:
       run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
       shell: bash
     - name: Build App
-      if: inputs.build == 'true' && runner.os == 'Windows'
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'false'
+      working-directory: ${{ inputs.app-working-directory }}
+      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o {{inputs.build-name}}
+      shell: bash
+    - name: Build App
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'true'
       working-directory: ${{ inputs.app-working-directory }}
       run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -nsis -o ${{inputs.build-name}}
       shell: bash
