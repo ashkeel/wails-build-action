@@ -48,7 +48,7 @@ By default, the action will build and upload the results to github, on a tagged 
 | `sign-windows-cert-passowrd`         | ''                   | Windows Signing Certificate Password               |
 | `windows-nsis-installer`             | `true`               | Creates NSIS Installer for Windows               |
 | `macos-package-type`                 | `pkg`                | MacOS package type (pkg/dmg)             |
-
+| `macos-package-file-name`            | ''                   | MacOS package file name             |
 
 
 ## Example Build
