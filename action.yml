@@ -109,6 +109,12 @@ runs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{inputs.go-version}}
+    - name: Go download dependencies
+      shell: bash
+      run: go mod download
+    - name: Go run tests
+      shell: bash
+      run: go test ./...
     # Setup and configure NodeJS
     - name: Setup NodeJS
       uses: actions/setup-node@v2
