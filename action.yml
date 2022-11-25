@@ -56,43 +56,47 @@ inputs:
   sign-macos-app-id:
     description: "MacOS Application Certificate id"
     required: false
-    default: ''
+    default: ""
   sign-macos-apple-password:
     description: "MacOS Apple password"
     required: false
-    default: ''
+    default: ""
   sign-macos-app-cert:
     description: "MacOS Application Certificate"
     required: false
-    default: ''
+    default: ""
   sign-macos-app-cert-password:
     description: "MacOS Application Certificate Password"
     required: false
-    default: ''
+    default: ""
   sign-macos-installer-id:
     description: "MacOS Installer Certificate id"
     required: false
-    default: ''
+    default: ""
   sign-macos-installer-cert:
     description: "MacOS Installer Certificate"
     required: false
-    default: ''
+    default: ""
   sign-macos-installer-cert-password:
     description: "MacOS Installer Certificate Password"
     required: false
-    default: ''
+    default: ""
   sign-windows-cert:
     description: "Windows Signing Certificate"
     required: false
-    default: ''
+    default: ""
   sign-windows-cert-password:
     description: "Windows Signing Certificate Password"
     required: false
-    default: ''
+    default: ""
   windows-nsis-installer:
     description: "Creates NSIS Installer for Windows"
     required: false
     default: "true"
+  use-upx:
+    description: "Use UPX for compressing final executable"
+    required: false
+    default: "false"
   macos-package-type:
     description: "MacOS package type"
     required: false
@@ -130,9 +134,16 @@ runs:
       if: inputs.build == 'true'
       run: go install github.com/wailsapp/wails/v2/cmd/wails@${{inputs.wails-version}}
       shell: bash
+    - name: Download UPX
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.upx == 'true'
+      run: |
+        Invoke-WebRequest -uri "https://github.com/upx/upx/releases/download/v4.0.1/upx-4.0.1-win64.zip" -Method "GET"  -Outfile upx.zip
+        Expand-Archive upx.zip -DestinationPath . -Force
+        Copy-Item ./upx-4.0.1-win64/upx.exe upx.exe
+      shell: powershell
     - name: Install Linux Wails deps
       if: inputs.build == 'true' && runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+      run: sudo apt-get update && sudo apt-get install libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu upx
       shell: bash
     - name: Install macOS Wails deps
       if: runner.os == 'macOS'
@@ -145,19 +156,35 @@ runs:
       run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
       shell: bash
     - name: Build App
-      if: inputs.build == 'true' &&  runner.os == 'Linux'
+      if: inputs.build == 'true' &&  runner.os == 'Linux' && inputs.use-upx == "false"
       working-directory: ${{ inputs.app-working-directory }}
       run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
       shell: bash
     - name: Build App
-      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'false'
+      if: inputs.build == 'true' &&  runner.os == 'Linux' && inputs.use-upx == "true"
+      working-directory: ${{ inputs.app-working-directory }}
+      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -upx -o ${{inputs.build-name}}
+      shell: bash
+      # This is hot steaming garbage please fix
+    - name: Build App
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'false' && inputs.use-upx == "false"
       working-directory: ${{ inputs.app-working-directory }}
       run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
       shell: bash
     - name: Build App
-      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'true'
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'true' && inputs.use-upx == "false"
       working-directory: ${{ inputs.app-working-directory }}
       run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -nsis -o ${{inputs.build-name}}
+      shell: bash
+    - name: Build App
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'false' && inputs.use-upx == "true"
+      working-directory: ${{ inputs.app-working-directory }}
+      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -upx -o ${{inputs.build-name}}
+      shell: bash
+    - name: Build App
+      if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'true' && inputs.use-upx == "true"
+      working-directory: ${{ inputs.app-working-directory }}
+      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -upx -nsis -o ${{inputs.build-name}}
       shell: bash
     - name: Go run tests
       shell: bash
@@ -229,7 +256,7 @@ runs:
       env:
         APPLE_PASSWORD: ${{ inputs.sign-macos-apple-password }}
       run: |
-        gon -log-level=info ./build/darwin/gon-notarize.json      
+        gon -log-level=info ./build/darwin/gon-notarize.json
     # Windows signing
     - name: Sign Windows binaries
       shell: powershell
