@@ -188,7 +188,7 @@ runs:
       shell: bash
     - name: Go run tests
       shell: bash
-      run: go test -v ./internal/... ./pkg/...
+      run: go test -v ./...
     - name: Add macOS perms
       if: inputs.build == 'true' && runner.os == 'macOS'
       working-directory: ${{ inputs.app-working-directory }}
