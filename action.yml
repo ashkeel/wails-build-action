@@ -105,6 +105,14 @@ inputs:
     description: "MacOS package file name"
     required: false
     default: ""
+  prerelease:
+    description: "Create release as prerelease"
+    required: false
+    default: "false"
+  draft:
+    description: "Create release as draft"
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -283,5 +291,7 @@ runs:
       uses: softprops/action-gh-release@v1
       if: inputs.package == 'true' && startsWith(github.ref, 'refs/tags/')
       with:
+        prerelease: ${{inputs.prerelease}}
+        draft: ${{inputs.draft}}
         files: |
           */bin/*
