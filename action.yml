@@ -113,6 +113,10 @@ inputs:
     description: "Create release as draft"
     required: false
     default: "false"
+  ldflags:
+    description: "Specify custom linker flags"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -161,38 +165,38 @@ runs:
     - name: Build App
       if: inputs.build == 'true' && runner.os == 'macOS'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
       shell: bash
     - name: Build App
       if: inputs.build == 'true' &&  runner.os == 'Linux' && inputs.use-upx == 'false'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}
       shell: bash
     - name: Build App
       if: inputs.build == 'true' &&  runner.os == 'Linux' && inputs.use-upx == 'true'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -upx -o ${{inputs.build-name}}
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -upx -o ${{inputs.build-name}}
       shell: bash
       # This is hot steaming garbage please fix
     - name: Build App
       if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'false' && inputs.use-upx == 'false'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}.exe
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -o ${{inputs.build-name}}.exe
       shell: bash
     - name: Build App
       if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'true' && inputs.use-upx == 'false'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -nsis -o ${{inputs.build-name}}.exe
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -nsis -o ${{inputs.build-name}}.exe
       shell: bash
     - name: Build App
       if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'false' && inputs.use-upx == 'true'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -upx -o ${{inputs.build-name}}.exe
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -upx -o ${{inputs.build-name}}.exe
       shell: bash
     - name: Build App
       if: inputs.build == 'true' && runner.os == 'Windows' && inputs.windows-nsis-installer == 'true' && inputs.use-upx == 'true'
       working-directory: ${{ inputs.app-working-directory }}
-      run: wails build --platform ${{inputs.build-platform}} -webview2 ${{inputs.wails-build-webview2}} -upx -nsis -o ${{inputs.build-name}}.exe
+      run: wails build --platform ${{inputs.build-platform}} --ldflags "${{inputs.ldflags}}" -webview2 ${{inputs.wails-build-webview2}} -upx -nsis -o ${{inputs.build-name}}.exe
       shell: bash
     - name: Go run tests
       shell: bash
